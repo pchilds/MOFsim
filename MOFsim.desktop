@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=MOFsim
+Comment=A utility for performing simulations on microstructured optical fibres via meep (FDTD)
+Exec=MOFsim
+Icon=db8
+Terminal=0
+Type=Application
+Categories=Education;Science;Math;NumericalAnalysis;
+Name[en_GB]=MOFsim.desktop
