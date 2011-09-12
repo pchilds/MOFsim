@@ -47,6 +47,7 @@ gchar *flr=NULL;
 gint grp;
 GPtrArray *fbl, *mtr;
 GtkWidget *cb1, *cb2, *crc, *di2, *di3, *di4, *di5, *di6, *mg2, *mg3, *mg4, *mg5, *mg6, *sbr, *wdw;
+gulong cb1_id, cb2_id;
 
 int main(int argc, char *argv[])
 {
@@ -205,7 +206,7 @@ int main(int argc, char *argv[])
 	cb1=gtk_combo_box_new_with_model(GTK_TREE_MODEL(sto));
 	g_object_unref(G_OBJECT(sto));
 	gtk_combo_box_set_active(GTK_COMBO_BOX(cb1), 0);
-	g_signal_connect(G_OBJECT(cb1), "popdown", G_CALLBACK(gmc), NULL);
+	cb1_id=g_signal_connect(G_OBJECT(cb1), "changed", G_CALLBACK(gmc), NULL);
 	gtk_box_pack_start(GTK_BOX(vbx), cb1, FALSE, FALSE, 2);
 	gtk_widget_show(cb1);
 	gtk_label_set_mnemonic_widget(GTK_LABEL(lbl), cb1);
@@ -213,6 +214,7 @@ int main(int argc, char *argv[])
 	gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(cb1), crn, TRUE);
 	gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(cb1), crn, "text", 0, NULL);
 	xpd=gtk_expander_new_with_mnemonic(_("_Orientation\n/Scale"));
+	g_signal_connect(xpd, "notify::expanded", G_CALLBACK(xpn), NULL);
 	gtk_box_pack_start(GTK_BOX(vbx), xpd, FALSE, FALSE, 2);
 	gtk_widget_show(xpd);
 	lbl=gtk_label_new_with_mnemonic(_("_Material:"));
@@ -226,7 +228,7 @@ int main(int argc, char *argv[])
 	cb2=gtk_combo_box_new_with_model(GTK_TREE_MODEL(sto));
 	g_object_unref(G_OBJECT(sto));
 	gtk_combo_box_set_active(GTK_COMBO_BOX(cb2), 1);
-	g_signal_connect(G_OBJECT(cb2), "popdown", G_CALLBACK(mtc), NULL);
+	cb2_id=g_signal_connect(G_OBJECT(cb2), "changed", G_CALLBACK(mtc), NULL);
 	gtk_box_pack_start(GTK_BOX(vbx), cb2, FALSE, FALSE, 2);
 	gtk_widget_show(cb2);
 	gtk_label_set_mnemonic_widget(GTK_LABEL(lbl), cb2);

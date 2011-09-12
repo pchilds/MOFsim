@@ -35,6 +35,7 @@
 #	define DRAW_IS_CIRC_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE((klass), DRAW_TYPE_CIRC))
 #	define DRAW_CIRC_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS((obj), DRAW_TYPE_CIRC, DrawCircClass))
 	typedef struct _DrawCircData DrawCircData;
+	typedef struct _DrawCircGroup DrawCircGroup;
 	typedef struct _DrawCirc DrawCirc;
 	typedef struct _DrawCircClass DrawCircClass;
 	typedef enum
@@ -44,13 +45,13 @@
 		DRAW_CIRC_ZOOM_SGL = 1 << 2
 	} DrawCircZoom;
 	struct _DrawCircData {gdouble x, y, r;};
+	struct _DrawCircGroup {gint col; GArray *xyr;};
 	struct _DrawCirc
 	{
 		GtkDrawingArea parent;
-		GSList *data; /* x, y and r data sets */
-		GArray *ind, *sizes; /* indices of first element and number of elements for each group */
-		GArray *rd, *gr, *bl, *al; /* colour and alpha of the groupings */
-		gint hgh; /* highlighted group */
+		GPtrArray *data; /* x, y and r data sets */
+		GArray *rd, *gr, *bl, *al; /* colour and alpha maps for the groupings */
+		gint hlc, hlp; /* current and prior highlighted groups */
 		gint zmode; /* zoom mode flags */
 		gdouble xps, yps; /* x and y position of mouse */
 	};
@@ -60,10 +61,11 @@
 		void (*moved) (DrawCirc *circ);
 		void (*highlight) (DrawCirc *circ);
 	};
-	gboolean draw_circ_update_scale(GtkWidget *widget, gdouble xn, gdouble xx, gdouble yn, gdouble yx);
-	gboolean draw_circ_print_eps(GtkWidget *widget, gchar *fout);
-	gboolean draw_circ_print_png(GtkWidget *widget, gchar *fout);
-	gboolean draw_circ_print_svg(GtkWidget *widget, gchar *fout);
+	gboolean draw_circ_redraw(GtkWidget*);
+	gboolean draw_circ_update_scale(GtkWidget *wgt, gdouble xn, gdouble xx, gdouble yn, gdouble yx);
+	gboolean draw_circ_print_eps(GtkWidget*, gchar*);
+	gboolean draw_circ_print_png(GtkWidget*, gchar*);
+	gboolean draw_circ_print_svg(GtkWidget*, gchar*);
 	GtkWidget *draw_circ_new(void);
 	G_END_DECLS
 #endif

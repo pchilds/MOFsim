@@ -27,8 +27,9 @@
 #	include "main.h"
 	extern gint grp;
 	extern GPtrArray *fbl, *mtr;
-	extern GtkWidget *cb1, *cb2, *crc, *sbr;
+	extern GtkWidget *cb1, *cb2, *crc, *sbr, *wdw;
 	extern GtkWidget *di2, *di3, *di4, *di5, *di6, *mg2, *mg3, *mg4, *mg5, *mg6;
+	extern gulong cb1_id, cb2_id;
 	void abt(GtkWidget*, gpointer);/*display about window*/
 	void add(GtkWidget*, gpointer);/*adds or updates currently selected group*/
 	void chl(DrawCirc*, gpointer);/*change selected group*/
@@ -39,4 +40,5 @@
 	void hlp(GtkWidget*, gpointer);/*loads help manual*/
 	void mgt(GtkWidget*, gpointer);/*populate magnetic properties*/
 	void mtc(GtkWidget*, gpointer);/*change of material*/
+	void xpn(GObject*, GParamSpec*, gpointer);/*orientation expander*/
 #endif

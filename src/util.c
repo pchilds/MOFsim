@@ -50,19 +50,13 @@ void add(GtkWidget *wgt, gpointer dta)
 	GSList *dat=NULL;
 
 	circ=DRAW_CIRC(crc);
-	if (grp>=0)
-	{
-		lyt=(FdtdLayout*)g_ptr_array_index(fbl, grp);
-		(lyt->geo)=gtk_combo_box_get_active(GTK_COMBO_BOX(cb1));
-		/*send data to drawcirc*/
-	}
+	if (grp>=0) lyt=(FdtdLayout*)g_ptr_array_index(fbl, grp);
 	else
 	{
 		lyt=g_new(FdtdLayout, 1);
-		dtm=g_new(DrawCircData, 1);
-		(dtm->r)=(lyt->rr);
 		g_ptr_array_add(fbl, (gpointer) lyt);
-		(lyt->geo)=gtk_combo_box_get_active(GTK_COMBO_BOX(cb1));
+/*		dtm=g_new(DrawCircData, 1);
+		(dtm->r)=(lyt->rr);
 		j=g_slist_length(circ->data);
 		g_array_append_val((circ->ind), j);
 		switch (lyt->geo)
@@ -163,20 +157,31 @@ void add(GtkWidget *wgt, gpointer dta)
 			j=1;
 			g_array_append_val((circ->sizes), j);
 			break;
-		}
+		}*/
 	}
+	(lyt->geo)=gtk_combo_box_get_active(GTK_COMBO_BOX(cb1));
 	(lyt->mat)=gtk_combo_box_get_active(GTK_COMBO_BOX(cb2));
+	/*populate other parameters*/
 	/*reset display when done*/
+	g_signal_handler_block(G_OBJECT(cb1), cb1_id);
+	g_signal_handler_block(G_OBJECT(cb2), cb2_id);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(cb1), -1);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(cb2), -1);
-	{grp=-1; (circ->hgh)=-1;}
+	g_signal_handler_unblock(G_OBJECT(cb1), cb1_id);
+	g_signal_handler_unblock(G_OBJECT(cb2), cb2_id);
+	{grp=-1; (circ->hlp)=-1; (circ->hlc)=-1;}
+	draw_circ_redraw(crc);
 }
 
 void chl(DrawCirc *circ, gpointer data)
 {
 	FdtdLayout *lyt;
 
-	grp=(circ->hgh);
+	/*remove temporary stuff from plot*/
+	draw_circ_redraw(crc);
+	grp=(circ->hlc);
+	g_signal_handler_block(G_OBJECT(cb1), cb1_id);
+	g_signal_handler_block(G_OBJECT(cb2), cb2_id);
 	if (grp>=0)
 	{
 		lyt=(FdtdLayout*) g_ptr_array_index(fbl, grp);
@@ -188,6 +193,8 @@ void chl(DrawCirc *circ, gpointer data)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cb1), -1);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cb2), -1);
 	}
+	g_signal_handler_unblock(G_OBJECT(cb1), cb1_id);
+	g_signal_handler_unblock(G_OBJECT(cb2), cb2_id);
 }
 
 void cmv(DrawCirc *circ, gpointer data)
@@ -207,11 +214,20 @@ void del(GtkWidget *wgt, gpointer dta)
 	{
 		circ=DRAW_CIRC(crc);
 		g_ptr_array_remove_index(fbl, grp);
+		g_signal_handler_block(G_OBJECT(cb1), cb1_id);
+		g_signal_handler_block(G_OBJECT(cb2), cb2_id);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cb1), -1);
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cb2), -1);
-		{grp=-1; (circ->hgh)=-1;}
+		g_signal_handler_unblock(G_OBJECT(cb1), cb1_id);
+		g_signal_handler_unblock(G_OBJECT(cb2), cb2_id);
 		/*also change plot*/
 	}
+	else
+	{
+		/*clear temporary stuff from plot*/
+	} 
+	{grp=-1; (circ->hlp)=-1; (circ->hlc)=-1;}
+	draw_circ_redraw(crc);
 }
 
 void dit(GtkWidget *wgt, gpointer dta)
@@ -224,7 +240,9 @@ void gmc(GtkWidget *wgt, gpointer dta)
 {
 	gint x;
 
-	x=gtk_combo_box_get_active(GTK_COMBO_BOX(wgt));
+	x=gtk_combo_box_get_active(GTK_COMBO_BOX(cb1));
+	/*change plot*/
+	draw_circ_redraw(crc);
 }
 
 void hlp(GtkWidget *wgt, gpointer dta)
@@ -253,19 +271,63 @@ void mgt(GtkWidget *wgt, gpointer dta)
 
 void mtc(GtkWidget *wgt, gpointer dta)
 {
+	FdtdMat *mat;
 	gint x;
 	GtkTreeIter itr;
-	GtkTreeModel* sto;
+	GtkTreeModel *sto;
+	GtkWidget *ctt, *dlg, *ent, *tbl;
 
 	x=gtk_combo_box_get_active(GTK_COMBO_BOX(wgt));
 	if (!x)
 	{
-		sto=gtk_combo_box_get_model(GTK_COMBO_BOX(wgt));
-		gtk_combo_box_get_active_iter(GTK_COMBO_BOX(wgt), &itr);
-		gtk_list_store_append(GTK_LIST_STORE(sto), &itr);
-		gtk_list_store_set(GTK_LIST_STORE(sto), &itr, 0, _("New Item"), -1);
-		gtk_combo_box_set_model(GTK_COMBO_BOX(wgt), sto);
-		g_object_unref(G_OBJECT(sto));
+		dlg=gtk_dialog_new_with_buttons(_("Material Parameters"), GTK_WINDOW(wdw), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_APPLY, NULL);
+		g_signal_connect_swapped(G_OBJECT(dlg), "destroy", G_CALLBACK(gtk_widget_destroy), G_OBJECT(dlg));
+		gtk_widget_show(dlg);
+		ctt=gtk_dialog_get_content_area(GTK_DIALOG(dlg));
+		ent=gtk_entry_new();
+		gtk_box_pack_start(GTK_BOX(ctt), ent, TRUE, TRUE, 2);
+		tbl=gtk_table_new(2, 3, FALSE);
+		gtk_widget_show(tbl);
+		/*populate dialog with name and properties for material*/
+		gtk_box_pack_start(GTK_BOX(ctt), tbl, TRUE, TRUE, 2);
+		if (gtk_dialog_run(GTK_DIALOG(dlg))==GTK_RESPONSE_APPLY)
+		{
+			mat=g_new(FdtdMat, 1);
+			g_ptr_array_add(mtr, (gpointer) mat);
+			(mat->nme)=g_strdup(gtk_entry_get_text(GTK_ENTRY(ent)));
+			/*populate mat*/
+			sto=gtk_combo_box_get_model(GTK_COMBO_BOX(wgt));
+			gtk_combo_box_get_active_iter(GTK_COMBO_BOX(wgt), &itr);
+			gtk_list_store_append(GTK_LIST_STORE(sto), &itr);
+			gtk_list_store_set(GTK_LIST_STORE(sto), &itr, 0, _("New Item"), -1);
+			gtk_combo_box_set_model(GTK_COMBO_BOX(wgt), sto);
+			g_object_unref(G_OBJECT(sto));
+		}
+		gtk_widget_destroy(dlg);
+	}
+	else
+	{
+		/*change colour for selected group*/
+	}
+	draw_circ_redraw(crc);
+}
+
+void xpn(GObject *obj, GParamSpec *spc, gpointer data)
+{
+	GtkWidget *tbl;
+
+	if (gtk_expander_get_expanded(GTK_EXPANDER(obj)))
+	{
+		tbl=gtk_table_new(2, 3, FALSE);
+		gtk_widget_show(tbl);
+		/*populate table and add signals*/
+		gtk_container_add(GTK_CONTAINER(obj), tbl);
+	}
+	else
+	{
+		tbl=gtk_bin_get_child(GTK_BIN(obj));
+		/*save table values somewhere*/
+		gtk_container_remove(GTK_CONTAINER(obj), tbl);
 	}
 }
 

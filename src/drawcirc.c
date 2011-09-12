@@ -49,14 +49,14 @@ typedef struct _DrawCircPrivate DrawCircPrivate;
 struct sd {gdouble xmin, ymin, xmax, ymax;};
 struct _DrawCircPrivate {struct sd bounds, rescale; guint flagr, flago;};
 
-static void drwz(GtkWidget *widget, cairo_t *cr)
+static void drwz(GtkWidget *wgt, cairo_t *cr)
 {
 	gint xw;
 	gdouble dt;
 	DrawCirc *circ;
 
-	xw=(widget->allocation.width);
-	circ=DRAW_CIRC(widget);
+	xw=(wgt->allocation.width);
+	circ=DRAW_CIRC(wgt);
 	cairo_set_source_rgba(cr, 0, 0, 0, 1);
 	cairo_set_line_width(cr, 1);
 	cairo_rectangle(cr, xw-21.5, 0.5, 10, 10);
@@ -117,19 +117,20 @@ static void drwz(GtkWidget *widget, cairo_t *cr)
 	}
 }
 
-static void drwc(GtkWidget *widget, cairo_t *cr)
+static void drwc(GtkWidget *wgt, cairo_t *cr)
 {
 	DrawCirc *circ;
 	DrawCircData *dtm;
+	DrawCircGroup *dcg;
 	DrawCircPrivate *priv;
 	gdouble av, sx, sy, vv, wv, zv;
 	gint ft, j, k, lt, rw, ww, xw, yw;
 	GSList *dta;
 
-	xw=(widget->allocation.width);
-	yw=(widget->allocation.height);
-	circ=DRAW_CIRC(widget);
-	priv=DRAW_CIRC_GET_PRIVATE(widget);
+	xw=(wgt->allocation.width);
+	yw=(wgt->allocation.height);
+	circ=DRAW_CIRC(wgt);
+	priv=DRAW_CIRC_GET_PRIVATE(wgt);
 	if (circ->data)
 	{
 		sx=((priv->bounds.xmax)-(priv->bounds.xmin))/xw;
@@ -137,182 +138,181 @@ static void drwc(GtkWidget *widget, cairo_t *cr)
 		if (sx>sy)
 		{
 			{(priv->flago)=0; sx=1/sy;}
-			for (k=0;k<(circ->ind->len);k++)
+			for (k=0;k<(circ->data->len);k++)
 			{
-				if (k=(circ->hgh)) {vv=0; wv=1; zv=0; av=1;}
+				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
+				if (k==(circ->hlc)) {vv=0; wv=1; zv=0; av=1;}
 				else
 				{
-					ft=fmod(k,(circ->rd->len));
+					ft=fmod((dcg->col),(circ->rd->len));
 					vv=g_array_index((circ->rd), gdouble, ft);
 					wv=g_array_index((circ->gr), gdouble, ft);
 					zv=g_array_index((circ->bl), gdouble, ft);
 					av=g_array_index((circ->al), gdouble, ft);
 				}
 				cairo_set_source_rgba(cr, vv, wv, zv, av);
-				ft=g_array_index((circ->ind), gint, k);
-				dta=g_slist_nth((circ->data), ft);
-				lt=g_array_index((circ->sizes), gint, k);
-				for (j=0;j<lt;j++)
+				for (j=0;j<(dcg->xyr->len);j++)
 				{
-					dtm=(DrawCircData*) dta;
+					dtm=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
 					ww=(xw+(sx*((2*(dtm->x))-(priv->bounds.xmin)-(priv->bounds.xmax))))/2;
 					yw=sx*((priv->bounds.ymax)-(dtm->y));
 					rw=sx*(dtm->r);
 					cairo_arc(cr, ww, yw, rw, 0, MY_2PI);
 					cairo_fill(cr);
-					dta=(dta->next);
 				}
 			}
 		}
 		else
 		{
 			{(priv->flago)=1; sx=1/sx;}
-			for (k=0;k<(circ->ind->len);k++)
+			for (k=0;k<(circ->data->len);k++)
 			{
-				ft=fmod(k,(circ->rd->len));
-				vv=g_array_index((circ->rd), gdouble, ft);
-				wv=g_array_index((circ->gr), gdouble, ft);
-				zv=g_array_index((circ->bl), gdouble, ft);
-				av=g_array_index((circ->al), gdouble, ft);
-				cairo_set_source_rgba(cr, vv, wv, zv, av);
-				ft=g_array_index((circ->ind), gint, k);
-				dta=g_slist_nth((circ->data), ft);
-				lt=g_array_index((circ->sizes), gint, k);
-				for (j=0;j<lt;j++)
+				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
+				if (k==(circ->hlc)) {vv=0; wv=1; zv=0; av=1;}
+				else
 				{
-					dtm=(DrawCircData*) dta; 
+					ft=fmod((dcg->col),(circ->rd->len));
+					vv=g_array_index((circ->rd), gdouble, ft);
+					wv=g_array_index((circ->gr), gdouble, ft);
+					zv=g_array_index((circ->bl), gdouble, ft);
+					av=g_array_index((circ->al), gdouble, ft);
+				}
+				cairo_set_source_rgba(cr, vv, wv, zv, av);
+				for (j=0;j<(dcg->xyr->len);j++)
+				{
+					dtm=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
 					xw=sx*((dtm->x)-(priv->bounds.xmin));
 					ww=(yw+(sx*((priv->bounds.ymax)+(priv->bounds.ymin)-(2*(dtm->y)))))/2;
 					rw=sx*(dtm->r);
 					cairo_arc(cr, xw, ww, rw, 0, MY_2PI);
 					cairo_fill(cr);
-					dta=(dta->next);
 				}
 			}
 		}
 	}
 }
 
-static void draw_circ_redraw(GtkWidget *widget)
+gboolean draw_circ_redraw(GtkWidget *wgt)
 {
-	GdkRegion *region;
+	GdkRegion *rgn;
 
-	if (!(widget->window)) return;
-	region=gdk_drawable_get_clip_region(widget->window);
-	gdk_window_invalidate_region((widget->window), region, TRUE);
-	gdk_window_process_updates((widget->window), TRUE);
-	gdk_region_destroy(region);
+	if (!(wgt->window)) return;
+	rgn=gdk_drawable_get_clip_region(wgt->window);
+	gdk_window_invalidate_region((wgt->window), rgn, TRUE);
+	gdk_window_process_updates((wgt->window), TRUE);
+	gdk_region_destroy(rgn);
+	return FALSE;
 }
 
-gboolean draw_circ_update_scale(GtkWidget *widget, gdouble xn, gdouble xx, gdouble yn, gdouble yx)
+gboolean draw_circ_update_scale(GtkWidget *wgt, gdouble xn, gdouble xx, gdouble yn, gdouble yx)
 {
 	DrawCircPrivate *priv;
 
-	priv=DRAW_CIRC_GET_PRIVATE(widget);
+	priv=DRAW_CIRC_GET_PRIVATE(wgt);
 	(priv->bounds.xmin)=xn;
 	(priv->bounds.xmax)=xx;
 	(priv->bounds.ymin)=yn;
 	(priv->bounds.ymax)=yx;
-	draw_circ_redraw(widget);
-	return FALSE;
+	return draw_circ_redraw(wgt);
 }
 
-gboolean draw_circ_print_eps(GtkWidget *widget, gchar* fout)
+gboolean draw_circ_print_eps(GtkWidget *wgt, gchar* fout)
 {
 	cairo_t *cr;
-	cairo_surface_t *surface;
+	cairo_surface_t *sfc;
 
-	surface=cairo_ps_surface_create(fout, (gdouble) (widget->allocation.width), (gdouble) (widget->allocation.height));
-	cairo_ps_surface_set_eps(surface, TRUE);
-	cairo_ps_surface_restrict_to_level(surface, CAIRO_PS_LEVEL_2);
-	cr=cairo_create(surface);
-	drwc(widget, cr);
-	cairo_surface_show_page(surface);
+	sfc=cairo_ps_surface_create(fout, (gdouble) (wgt->allocation.width), (gdouble) (wgt->allocation.height));
+	cairo_ps_surface_set_eps(sfc, TRUE);
+	cairo_ps_surface_restrict_to_level(sfc, CAIRO_PS_LEVEL_2);
+	cr=cairo_create(sfc);
+	drwc(wgt, cr);
+	cairo_surface_show_page(sfc);
 	cairo_destroy(cr);
-	cairo_surface_finish(surface);
-	cairo_surface_destroy(surface);
+	cairo_surface_finish(sfc);
+	cairo_surface_destroy(sfc);
 	return FALSE;
 }
 
-gboolean draw_circ_print_png(GtkWidget *widget, gchar* fout)
+gboolean draw_circ_print_png(GtkWidget *wgt, gchar* fout)
 {
 	cairo_t *cr;
-	cairo_surface_t *surface;
+	cairo_surface_t *sfc;
 
-	surface=cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (gdouble) (widget->allocation.width), (gdouble) (widget->allocation.height));
-	cr=cairo_create(surface);
-	drwc(widget, cr);
-	cairo_surface_write_to_png(surface, fout);
+	sfc=cairo_image_surface_create(CAIRO_FORMAT_ARGB32, (gdouble) (wgt->allocation.width), (gdouble) (wgt->allocation.height));
+	cr=cairo_create(sfc);
+	drwc(wgt, cr);
+	cairo_surface_write_to_png(sfc, fout);
 	cairo_destroy(cr);
-	cairo_surface_destroy(surface);
+	cairo_surface_destroy(sfc);
 	return FALSE;
 }
 
-gboolean draw_circ_print_svg(GtkWidget *widget, gchar* fout)
+gboolean draw_circ_print_svg(GtkWidget *wgt, gchar* fout)
 {
 	cairo_t *cr;
-	cairo_surface_t *surface;
+	cairo_surface_t *sfc;
 
-	surface=cairo_svg_surface_create(fout, (gdouble) (widget->allocation.width), (gdouble) (widget->allocation.height));
-	cr=cairo_create(surface);
-	drwc(widget, cr);
+	sfc=cairo_svg_surface_create(fout, (gdouble) (wgt->allocation.width), (gdouble) (wgt->allocation.height));
+	cr=cairo_create(sfc);
+	drwc(wgt, cr);
 	cairo_destroy(cr);
-	cairo_surface_destroy(surface);
+	cairo_surface_destroy(sfc);
 	return FALSE;
 }
 
-static gboolean draw_circ_button_press(GtkWidget *widget, GdkEventButton *event)
+static gboolean draw_circ_button_press(GtkWidget *wgt, GdkEventButton *vnt)
 {
 	DrawCirc *circ;
 	DrawCircPrivate *priv;
 
-	priv=DRAW_CIRC_GET_PRIVATE(widget);
-	circ=DRAW_CIRC(widget);
-	if (((event->y)<=11)&&((event->x)>=(widget->allocation.width)-22)) (priv->flagr)=1;
+	priv=DRAW_CIRC_GET_PRIVATE(wgt);
+	circ=DRAW_CIRC(wgt);
+	if (((vnt->y)<=11)&&((vnt->x)>=(wgt->allocation.width)-22)) (priv->flagr)=1;
 	else if (((circ->zmode)&DRAW_CIRC_ZOOM_ENB)!=0) {(priv->rescale.xmin)=(circ->xps); (priv->rescale.ymin)=(circ->yps); (priv->flagr)=2;}
 	else (priv->flagr)=3;
 	return FALSE;
 }
 
-static gboolean draw_circ_motion_notify(GtkWidget *widget, GdkEventMotion *event)
+static gboolean draw_circ_motion_notify(GtkWidget *wgt, GdkEventMotion *vnt)
 {
 	DrawCirc *circ;
 	DrawCircPrivate *priv;
 	gdouble ds;
 
-	priv=DRAW_CIRC_GET_PRIVATE(widget);
-	circ=DRAW_CIRC(widget);
-	ds=(event->x)/(widget->allocation.width);
+	priv=DRAW_CIRC_GET_PRIVATE(wgt);
+	circ=DRAW_CIRC(wgt);
+	ds=(vnt->x)/(wgt->allocation.width);
 	(circ->xps)=((priv->bounds.xmax)*ds)+((priv->bounds.xmin)*(1-ds));
-	ds=(event->y)/(widget->allocation.height);
+	ds=(vnt->y)/(wgt->allocation.height);
 	(circ->yps)=((priv->bounds.ymax)*(1-ds))+((priv->bounds.ymin)*ds);
 	g_signal_emit(circ, draw_circ_signals[MOVED], 0);
 	return FALSE;
 }
 
-static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *event)
+static gboolean draw_circ_button_release(GtkWidget *wgt, GdkEventButton *vnt)
 {
 	DrawCirc *circ;
 	DrawCircData *dtm;
 	DrawCircPrivate *priv;
+	GArray *ary;
 	gdouble s, xn, xx, yn, yx;
-	gint j, xw;
+	gint j, k, xw;
 	GSList *dta;
 
-	priv=DRAW_CIRC_GET_PRIVATE(widget);
-	circ=DRAW_CIRC(widget);
+	priv=DRAW_CIRC_GET_PRIVATE(wgt);
+	circ=DRAW_CIRC(wgt);
 	if ((priv->flagr)==1)
 	{
-		if ((event->y)<=11)
+		if ((vnt->y)<=11)
 		{
-			xw=(widget->allocation.width);
-			if ((event->x)>=xw-22)
+			xw=(wgt->allocation.width);
+			if ((vnt->x)>=xw-22)
 			{
-				if ((event->x)>=xw-11) (circ->zmode)^=DRAW_CIRC_ZOOM_OUT;
+				if ((vnt->x)>=xw-11) (circ->zmode)^=DRAW_CIRC_ZOOM_OUT;
 				else if (((circ->zmode)&DRAW_CIRC_ZOOM_SGL)!=0) (circ->zmode)&=DRAW_CIRC_ZOOM_OUT;
 				else if (((circ->zmode)&DRAW_CIRC_ZOOM_ENB)!=0) (circ->zmode)|=DRAW_CIRC_ZOOM_SGL;
 				else (circ->zmode)|=DRAW_CIRC_ZOOM_ENB;
-				draw_circ_redraw(widget);
+				draw_circ_redraw(wgt);
 			}
 		}
 	}
@@ -325,7 +325,7 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 			yn=(priv->rescale.ymax)-(priv->rescale.ymin);
 			if (((xn>DZE)||(xn<NZE))&&((yn>DZE)||(yn<NZE)))
 			{
-				if (((circ->zmode)&DRAW_CIRC_ZOOM_OUT)==0) draw_circ_update_scale(widget, (priv->rescale.xmin), (priv->rescale.xmax), (priv->rescale.ymin), (priv->rescale.ymax));
+				if (((circ->zmode)&DRAW_CIRC_ZOOM_OUT)==0) draw_circ_update_scale(wgt, (priv->rescale.xmin), (priv->rescale.xmax), (priv->rescale.ymin), (priv->rescale.ymax));
 				else
 				{
 					s=((priv->bounds.xmax)-(priv->bounds.xmin))/xn;
@@ -342,7 +342,7 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 							yn+=(priv->bounds.ymin);
 							yx=((priv->bounds.ymax)-(priv->rescale.ymax))*s;
 							yx+=(priv->bounds.ymax);
-							draw_circ_update_scale(widget, xn, xx, yn, yx);
+							draw_circ_update_scale(wgt, xn, xx, yn, yx);
 						}
 						else if (s<0)
 						{
@@ -350,7 +350,7 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 							yn+=(priv->bounds.ymin);
 							yn=((priv->rescale.ymin)-(priv->bounds.ymax))*s;
 							yx+=(priv->bounds.ymax);
-							draw_circ_update_scale(widget, xn, xx, yn, yx);
+							draw_circ_update_scale(wgt, xn, xx, yn, yx);
 						}
 					}
 					else if (s<0)
@@ -366,7 +366,7 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 							yn+=(priv->bounds.ymin);
 							yn=((priv->bounds.ymax)-(priv->rescale.ymax))*s;
 							yx+=(priv->bounds.ymax);
-							draw_circ_update_scale(widget, xn, xx, yn, yx);
+							draw_circ_update_scale(wgt, xn, xx, yn, yx);
 						}
 						else if (s<0)
 						{
@@ -374,7 +374,7 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 							yn+=(priv->bounds.ymin);
 							yn=((priv->rescale.ymin)-(priv->bounds.ymax))*s;
 							yx+=(priv->bounds.ymax);
-							draw_circ_update_scale(widget, xn, xx, yn, yx);
+							draw_circ_update_scale(wgt, xn, xx, yn, yx);
 						}
 					}
 				}
@@ -390,7 +390,7 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 			yx=yn;
 			yn+=ZSC*(priv->bounds.ymin);
 			yx+=ZSC*(priv->bounds.ymax);
-			draw_circ_update_scale(widget, xn, xx, yn, yx);
+			draw_circ_update_scale(wgt, xn, xx, yn, yx);
 		}
 		else
 		{
@@ -402,30 +402,35 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 			yx=yn;
 			yn+=UZ*(priv->bounds.ymin);
 			yx+=UZ*(priv->bounds.ymax);
-			draw_circ_update_scale(widget, xn, xx, yn, yx);
+			draw_circ_update_scale(wgt, xn, xx, yn, yx);
 		}
 	}
 	else if ((priv->flagr)==2)
 	{
 		if (circ->data)
 		{
-			(circ->hgh)=-1;
-			{dta=(circ->data); xw=0; j=0;}
-			while (dta)
+			(circ->hlp)=(circ->hlc);
+			(circ->hlc)=-1;
+			j=(circ->data->len);
+			while (j>0)
 			{
-				dtm=(DrawCircData*) dta;
-				xn=(dtm->x)-(circ->xps);
-				yn=(dtm->y)-(circ->yps);
-				s=(dtm->r);
-				{xn*=xn; yn*=yn; s*=s;}
-				if (xn+yn-s<=0)
+				ary=(((DrawCircGroup*) g_ptr_array_index((circ->data), --j))->xyr);
+				for (k=0;k<(ary->len);k++)
 				{
-					while (j<(circ->ind->len)) if (g_array_index((circ->ind), gint, j++)>xw) break;
-					(circ->hgh)=j--;
+					dtm=(DrawCircData*) g_array_index(ary, DrawCircData*, k);
+					xn=(dtm->x)-(circ->xps);
+					yn=(dtm->y)-(circ->yps);
+					s=(dtm->r);
+					{xn*=xn; yn*=yn; s*=s;}
+					if (xn+yn-s<=0)
+					{
+						(circ->hlc)=j;
+						goto done;
+					}
 				}
-				{dta=(dta->next); xw++;}
 			}
-			g_signal_emit(circ, draw_circ_signals[HLITE], 0);
+			done:
+			if ((circ->hlc)!=(circ->hlp)) g_signal_emit(circ, draw_circ_signals[HLITE], 0);
 		}
 	}
 	(priv->flagr)=0;
@@ -434,94 +439,98 @@ static gboolean draw_circ_button_release(GtkWidget *widget, GdkEventButton *even
 
 static void draw_circ_finalise(DrawCirc *circ)
 {
-	if (circ->data) g_slist_free(circ->data);
-	if (circ->ind) g_array_free((circ->ind), FALSE);
-	if (circ->sizes) g_array_free((circ->sizes), FALSE);
+	gint j;
+
+	if (circ->data)
+	{
+		for (j=0;j<(circ->data->len);j++) g_array_free((((DrawCircGroup*) g_ptr_array_index((circ->data), j))->xyr), FALSE);
+		g_ptr_array_free((circ->data), FALSE);
+	}
 	if (circ->rd) g_array_free((circ->rd), FALSE);
 	if (circ->gr) g_array_free((circ->gr), FALSE);
 	if (circ->bl) g_array_free((circ->bl), FALSE);
 	if (circ->al) g_array_free((circ->al), FALSE);
 }
 
-static void draw_circ_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
+static void draw_circ_set_property(GObject *obj, guint p_id, const GValue *val, GParamSpec *psp)
 {
 	DrawCircPrivate *priv;
 
-	priv=DRAW_CIRC_GET_PRIVATE(object);
-	switch (prop_id)
+	priv=DRAW_CIRC_GET_PRIVATE(obj);
+	switch (p_id)
 	{
 		case PROP_BXN:
 		{
-			(priv->bounds.xmin)=g_value_get_double(value);
+			(priv->bounds.xmin)=g_value_get_double(val);
 			break;
 		}
 		case PROP_BXX:
 		{
-			(priv->bounds.xmax)=g_value_get_double(value);
+			(priv->bounds.xmax)=g_value_get_double(val);
 			break;
 		}
 		case PROP_BYN:
 		{
-			(priv->bounds.ymin)=g_value_get_double(value);
+			(priv->bounds.ymin)=g_value_get_double(val);
 			break;
 		}
 		case PROP_BYX:
 		{
-			(priv->bounds.ymax)=g_value_get_double(value);
+			(priv->bounds.ymax)=g_value_get_double(val);
 			break;
 		}
 		default:
 		{
-			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, p_id, psp);
 			break;
 		}
 	}
 }
 
-static void draw_circ_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+static void draw_circ_get_property(GObject *obj, guint p_id, GValue *val, GParamSpec *psp)
 {
 	DrawCircPrivate *priv;
 
-	priv=DRAW_CIRC_GET_PRIVATE(object);
-	switch (prop_id)
+	priv=DRAW_CIRC_GET_PRIVATE(obj);
+	switch (p_id)
 	{
 		case PROP_BXN:
 		{
-			g_value_set_double(value, (priv->bounds.xmin));
+			g_value_set_double(val, (priv->bounds.xmin));
 			break;
 		}
 		case PROP_BXX:
 		{
-			g_value_set_double(value, (priv->bounds.xmax));
+			g_value_set_double(val, (priv->bounds.xmax));
 			break;
 		}
 		case PROP_BYN:
 		{
-			g_value_set_double(value, (priv->bounds.ymin));
+			g_value_set_double(val, (priv->bounds.ymin));
 			break;
 		}
 		case PROP_BYX:
 		{
-			g_value_set_double(value, (priv->bounds.ymax));
+			g_value_set_double(val, (priv->bounds.ymax));
 			break;
 		}
 		default:
 		{
-			G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+			G_OBJECT_WARN_INVALID_PROPERTY_ID(obj, p_id, psp);
 			break;
 		}
 	}
 }
 
-static gboolean draw_circ_expose(GtkWidget *widget, GdkEventExpose *event)
+static gboolean draw_circ_expose(GtkWidget *wgt, GdkEventExpose *vnt)
 {
 	cairo_t *cr;
 
-	cr=gdk_cairo_create(widget->window);
-	cairo_rectangle(cr, (event->area.x), (event->area.y), (event->area.width), (event->area.height));
+	cr=gdk_cairo_create(wgt->window);
+	cairo_rectangle(cr, (vnt->area.x), (vnt->area.y), (vnt->area.width), (vnt->area.height));
 	cairo_clip(cr);
-	drwc(widget, cr);
-	drwz(widget, cr);
+	drwc(wgt, cr);
+	drwz(wgt, cr);
 	cairo_destroy(cr);
 	return FALSE;
 }
@@ -558,8 +567,8 @@ static void draw_circ_init(DrawCirc *circ)
 	priv=DRAW_CIRC_GET_PRIVATE(circ);
 	{(priv->bounds.xmin)=0; (priv->bounds.xmax)=1; (priv->bounds.ymin)=0; (priv->bounds.ymax)=1;}
 	(priv->flagr)=0;
-	{(circ->data)=NULL; (circ->ind)=NULL; (circ->sizes)=NULL;}
-	{(circ->zmode)=0; (circ->hgh)=-1;}
+	(circ->data)=NULL;
+	{(circ->zmode)=0; (circ->hlc)=-1; (circ->hlp)=-1;}
 	{(circ->xps)=0; (circ->yps)=0;}
 	(circ->rd)=g_array_sized_new(FALSE, FALSE, sizeof(gdouble), 12);
 	(circ->gr)=g_array_sized_new(FALSE, FALSE, sizeof(gdouble), 12);
