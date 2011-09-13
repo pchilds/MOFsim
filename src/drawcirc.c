@@ -142,6 +142,7 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 			{
 				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
 				if (k==(circ->hlc)) {vv=0; wv=1; zv=0; av=1;}
+				else if ((dcg->col)<0) {vv=1; wv=1; zv=1; av=1;}
 				else
 				{
 					ft=fmod((dcg->col),(circ->rd->len));

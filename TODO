@@ -1,15 +1,24 @@
 Done(ish)
 ---------
 abt
-chl
+add
 cmv
+del
 dit
 hlp
 mgt
 
 Yet to Complete
 ---------------
-* Orientation pop-up
+azc: 
+chl: 
+gmc: 
+mtc: 
+ptc: 
+rdc: 
+rgc: 
+xcc: 
+ycc: 
 
 Known Bugs/Issues
 -----------------
@@ -17,4 +26,4 @@ Known Bugs/Issues
 
 Future Proposals
 ----------------
-* Accessibility compliance:- Tab through highlighted groups
+* Accessibility compliance in DrawCirc:- Tab through highlighted groups

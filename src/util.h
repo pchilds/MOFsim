@@ -27,11 +27,12 @@
 #	include "main.h"
 	extern gint grp;
 	extern GPtrArray *fbl, *mtr;
-	extern GtkWidget *cb1, *cb2, *crc, *sbr, *wdw;
+	extern GtkWidget *az, *cb1, *cb2, *crc, *pt, *rd, *rg, *sbr, *wdw, *xc, *yc;
 	extern GtkWidget *di2, *di3, *di4, *di5, *di6, *mg2, *mg3, *mg4, *mg5, *mg6;
 	extern gulong cb1_id, cb2_id;
 	void abt(GtkWidget*, gpointer);/*display about window*/
 	void add(GtkWidget*, gpointer);/*adds or updates currently selected group*/
+	void azc(GtkWidget*, gpointer);/*change of azimuth*/
 	void chl(DrawCirc*, gpointer);/*change selected group*/
 	void cmv(DrawCirc*, gpointer);/*track mouse position on layout display*/
 	void del(GtkWidget*, gpointer);/*removes currently selected group from the layout*/
@@ -40,5 +41,9 @@
 	void hlp(GtkWidget*, gpointer);/*loads help manual*/
 	void mgt(GtkWidget*, gpointer);/*populate magnetic properties*/
 	void mtc(GtkWidget*, gpointer);/*change of material*/
-	void xpn(GObject*, GParamSpec*, gpointer);/*orientation expander*/
+	void ptc(GtkWidget*, gpointer);/*change of pitch*/
+	void rdc(GtkWidget*, gpointer);/*change of radius*/
+	void rgc(GtkWidget*, gpointer);/*change of ring*/
+	void xcc(GtkWidget*, gpointer);/*change of x centre*/
+	void ycc(GtkWidget*, gpointer);/*change of y centre*/
 #endif
