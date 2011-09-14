@@ -2,27 +2,28 @@ Done(ish)
 ---------
 abt
 add
+azc
+chl
 cmv
 del
 dit
+gmc
 hlp
 mgt
+ptc
+rdc
+rgc
+xcc
+ycc
 
 Yet to Complete
 ---------------
-azc: 
-chl: 
-gmc: 
-mtc: 
-ptc: 
-rdc: 
-rgc: 
-xcc: 
-ycc: 
+mtc
 
 Known Bugs/Issues
 -----------------
-* 
+* DrawCirc scales to fit wrong way and doesn't give mouse correct
+* Change to ring only produces one circle (different for the two different modes)
 
 Future Proposals
 ----------------

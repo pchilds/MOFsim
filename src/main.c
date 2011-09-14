@@ -44,7 +44,7 @@
 
 gchar img[]=vrs;
 gchar *flr=NULL;
-gint grp;
+gint gem, grp;
 GPtrArray *fbl, *mtr;
 GtkWidget *az, *cb1, *cb2, *crc, *di2, *di3, *di4, *di5, *di6, *lb1, *lb2, *lb3, *mg2, *mg3, *mg4, *mg5, *mg6, *pt, *rd, *rg, *sbr, *wdw, *sc, *xc, *yc;
 gulong cb1_id, cb2_id;
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	DrawCirc *circ;
 	DrawCircData *dcd;
 	DrawCircGroup *dcg;
-	GArray *xyr;
+	GArray *ary;
 	GPtrArray *pta;
 	GtkAccelGroup *a_g=NULL;
 	GtkAdjustment *adj;
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 	lbl=gtk_label_new(_("x centre:"));
 	gtk_table_attach(GTK_TABLE(tbl), lbl, 0, 1, 0, 1, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
 	gtk_widget_show(lbl);
-	adj=(GtkAdjustment*) gtk_adjustment_new(0, -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, 5.0, 0.0);
+	adj=(GtkAdjustment*) gtk_adjustment_new(0.5, -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, 5.0, 0.0);
 	xc=gtk_spin_button_new(adj, 0.5, 3);
 	g_signal_connect(G_OBJECT(xc), "value-changed", G_CALLBACK(xcc), NULL);
 	gtk_table_attach(GTK_TABLE(tbl), xc, 0, 1, 1, 2, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 	lbl=gtk_label_new(_("y centre:"));
 	gtk_table_attach(GTK_TABLE(tbl), lbl, 0, 1, 2, 3, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
 	gtk_widget_show(lbl);
-	adj=(GtkAdjustment*) gtk_adjustment_new(0, -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, 5.0, 0.0);
+	adj=(GtkAdjustment*) gtk_adjustment_new(0.5, -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, 5.0, 0.0);
 	yc=gtk_spin_button_new(adj, 0.5, 3);
 	g_signal_connect(G_OBJECT(yc), "value-changed", G_CALLBACK(ycc), NULL);
 	gtk_table_attach(GTK_TABLE(tbl), yc, 0, 1, 3, 4, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 	lbl=gtk_label_new(_("radius:"));
 	gtk_table_attach(GTK_TABLE(tbl), lbl, 0, 1, 4, 5, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
 	gtk_widget_show(lbl);
-	adj=(GtkAdjustment*) gtk_adjustment_new(1.0, 0, G_MAXDOUBLE, 1.0, 5.0, 0.0);
+	adj=(GtkAdjustment*) gtk_adjustment_new(0.5, 0, G_MAXDOUBLE, 1.0, 5.0, 0.0);
 	rd=gtk_spin_button_new(adj, 0.5, 3);
 	g_signal_connect(G_OBJECT(rd), "value-changed", G_CALLBACK(rdc), NULL);
 	gtk_table_attach(GTK_TABLE(tbl), rd, 0, 1, 5, 6, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
 	atk_object_add_relationship(atkwgt, ATK_RELATION_LABELLED_BY, atklbl);
 	lb1=gtk_label_new(_("pitch:"));
 	gtk_table_attach(GTK_TABLE(tbl), lb1, 1, 2, 0, 1, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
-	adj=(GtkAdjustment*) gtk_adjustment_new(1.0, 0, G_MAXDOUBLE, 1.0, 5.0, 0.0);
+	adj=(GtkAdjustment*) gtk_adjustment_new(0.2, 0, G_MAXDOUBLE, 1.0, 5.0, 0.0);
 	pt=gtk_spin_button_new(adj, 0.5, 3);
 	g_signal_connect(G_OBJECT(pt), "value-changed", G_CALLBACK(ptc), NULL);
 	gtk_table_attach(GTK_TABLE(tbl), pt, 1, 2, 1, 2, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 	atklbl=gtk_widget_get_accessible(GTK_WIDGET(lb2));
 	atk_object_add_relationship(atklbl, ATK_RELATION_LABEL_FOR, atkwgt);
 	atk_object_add_relationship(atkwgt, ATK_RELATION_LABELLED_BY, atklbl);
-	lb3=gtk_label_new(_("azimuth:"));
+	lb3=gtk_label_new(_("azimuth:\n(degrees)"));
 	gtk_table_attach(GTK_TABLE(tbl), lb3, 1, 2, 4, 5, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
 	adj=(GtkAdjustment*) gtk_adjustment_new(0.0, -180, 180, 10.0, 30.0, 0.0);
 	az=gtk_spin_button_new(adj, 0.5, 0);
@@ -318,15 +318,15 @@ int main(int argc, char *argv[])
 	gtk_widget_show(btt);
 	g_signal_connect(G_OBJECT(btt), "clicked", G_CALLBACK(add), NULL);
 	flr=g_strdup("/home");
-	grp=0;
+	{grp=0; gem=0;}
 	mtr=g_ptr_array_new();
 	fbl=g_ptr_array_new();
 	dcd=g_new(DrawCircData, 1);
-	{(dcd->x)=0; (dcd->y)=0; (dcd->r)=1;}
-	xyr=g_array_new(FALSE, FALSE, sizeof(DrawCircData));
-	g_array_append_val(xyr, dcd);
+	{(dcd->x)=0.5; (dcd->y)=0.5; (dcd->r)=1;}
+	ary=g_array_new(FALSE, FALSE, sizeof(DrawCircData*));
+	g_array_append_val(ary, dcd);
 	dcg=g_new(DrawCircGroup, 1);
-	{(dcg->col)=0; (dcg->xyr)=xyr;}
+	{(dcg->col)=0; (dcg->xyr)=ary;}
 	pta=g_ptr_array_new();
 	g_ptr_array_add(pta, (gpointer) dcg);
 	circ=DRAW_CIRC(crc);
