@@ -26,7 +26,31 @@
 
 void go(GtkWidget *wgt, gpointer dta)
 {
-	
+	gchar *fin, *st1;
+	GtkWidget *wfl;
 
-	
+	wfl=gtk_file_chooser_dialog_new(_("Select Data File"), GTK_WINDOW(dta), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OK, GTK_RESPONSE_ACCEPT, NULL);
+	g_signal_connect(G_OBJECT(wfl), "destroy", G_CALLBACK(gtk_widget_destroy), G_OBJECT(wfl));
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(wfl), flr);
+	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(wfl), FALSE);
+	gtk_file_chooser_set_show_hidden(GTK_FILE_CHOOSER(wfl), FALSE);
+	if (gtk_dialog_run(GTK_DIALOG(wfl))==GTK_RESPONSE_ACCEPT)
+	{
+		g_free(flr);
+		flr=gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(wfl));
+		fin=gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(wfl));
+		if (!g_str_has_suffix(fin, ".ctl"))
+		{
+			st1=g_strdup(fin);
+			g_free(fin);
+			fin=g_strconcat(st1, ".ctl", NULL);
+			g_free(st1);
+		}
+		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd))) st1=g_strdup_printf("meep %s", fin);
+		else st1=g_strdup_printf("meep fcn=%f fwd=%f %s", fcn, fwd, fin);
+		g_free(fin);
+		system(st1);
+		g_free(st1);
+	}
+	gtk_widget_destroy(wfl);
 }

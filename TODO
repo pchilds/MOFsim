@@ -1,29 +1,15 @@
-Done(ish)
----------
-abt
-add
-azc
-chl
-cmv
-del
-dit
-gmc
-hlp
-mgt
-ptc
-rdc
-rgc
-xcc
-ycc
-
 Yet to Complete
 ---------------
-mtc
+opn
 
 Known Bugs/Issues
 -----------------
-* DrawCirc scales to fit wrong way and doesn't give mouse correct
-* Change to ring only produces one circle (different for the two different modes)
+* Fill outside clip region (DrawCirc.c)
+* placing air gives pink not white for first layer.
+* parallelise parallel version
+* changing layers doesn't work at all
+* hidden files are shown in gtk_file_chooser
+* ?temporary layer is also saved?
 
 Future Proposals
 ----------------

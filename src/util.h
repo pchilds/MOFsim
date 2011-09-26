@@ -25,10 +25,11 @@
 #ifndef __UTIL_H__
 #	define __UTIL_H__
 #	include "main.h"
+	extern gdouble fcn, fsz, fwd;
 	extern gint gem, grp;
 	extern GPtrArray *fbl, *mtr;
-	extern GtkWidget *az, *cb1, *cb2, *crc, *lb1, *lb2, *lb3, *pt, *rd, *rg, *sbr, *wdw, *xc, *yc;
-	extern GtkWidget *di2, *di3, *di4, *di5, *di6, *mg2, *mg3, *mg4, *mg5, *mg6;
+	extern GtkWidget *az, *cb1, *cb2, *crc, *lb1, *lb2, *lb3, *pt, *rd, *rg, *sbr, *xc, *yc;
+	extern GtkWidget *di1, *di2, *di3, *di4, *di5, *di6, *mg1, *mg2, *mg3, *mg4, *mg5, *mg6;
 	extern gulong cb1_id, cb2_id;
 	void abt(GtkWidget*, gpointer);/*display about window*/
 	void add(GtkWidget*, gpointer);/*adds or updates currently selected group*/
@@ -44,6 +45,7 @@
 	void ptc(GtkWidget*, gpointer);/*change of pitch*/
 	void rdc(GtkWidget*, gpointer);/*change of radius*/
 	void rgc(GtkWidget*, gpointer);/*change of ring*/
+	void src(GtkWidget*, gpointer);/*change source properties*/
 	void xcc(GtkWidget*, gpointer);/*change of x centre*/
 	void ycc(GtkWidget*, gpointer);/*change of y centre*/
 #endif

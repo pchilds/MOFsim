@@ -24,19 +24,15 @@
 
 #include "data.h"
 
-void sav(GtkWidget *wgt, gpointer dta)
-{
-}
-
 void opn(GtkWidget *wgt, gpointer dta)
 {
-	GtkWidget *wfl;
-	gint sal;
 	gchar *cts=NULL, *fin=NULL, *str;
 	gchar **sta=NULL;
+	gint sal;
 	GError *Err=NULL;
+	GtkWidget *wfl;
 
-	wfl=gtk_file_chooser_dialog_new(_("Select Data File"), GTK_WINDOW(wdw), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	wfl=gtk_file_chooser_dialog_new(_("Select Data File"), GTK_WINDOW(dta), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(wfl), FALSE);
 	gtk_file_chooser_set_show_hidden(GTK_FILE_CHOOSER(wfl), FALSE);
 	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(wfl), flr);
@@ -64,6 +60,204 @@ void opn(GtkWidget *wgt, gpointer dta)
 		}
 		g_free(cts);
 		g_free(fin);
+	}
+	gtk_widget_destroy(wfl);
+}
+
+void sav(GtkWidget *wgt, gpointer dta)
+{
+	DrawCirc *circ;
+	DrawCircData *dcd;
+	DrawCircGroup *dcg;
+	FdtdMat *mat;
+	gchar *cts=NULL, *fot=NULL, *st1=NULL, *st2=NULL, *st3=NULL;
+	gdouble xn, xx, yn, yx;
+	GError *Err=NULL;
+	gint j, k;
+	GtkWidget *wfl;
+
+	wfl=gtk_file_chooser_dialog_new(_("Select Data File"), GTK_WINDOW(dta), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+	g_signal_connect(G_OBJECT(wfl), "destroy", G_CALLBACK(gtk_widget_destroy), G_OBJECT(wfl));
+	gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(wfl), flr);
+	gtk_file_chooser_set_show_hidden(GTK_FILE_CHOOSER(wfl), FALSE);
+	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(wfl), TRUE);
+	if (gtk_dialog_run(GTK_DIALOG(wfl))==GTK_RESPONSE_ACCEPT)
+	{
+		g_free(flr);
+		flr=gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(wfl));
+		fot=gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(wfl));
+		if (!g_str_has_suffix(fot, ".ctl"))
+		{
+			st2=g_strdup(fot);
+			g_free(fot);
+			fot=g_strconcat(st2, ".ctl", NULL);
+			g_free(st2);
+		}
+		circ=DRAW_CIRC(crc);
+		g_object_get(G_OBJECT(crc), "xmin", &xn, "xmax", &xx, "ymin", &yn, "ymax", &yx, NULL);
+		st2=g_strdup_printf("(set! geometry-lattice (make lattice (size %f %f no-size)))", xx-xn+(2*PML), yx-yn+(2*PML));
+		for (j=0;j<(mtr->len);j++)
+		{
+			mat=(FdtdMat*) g_ptr_array_index(mtr, j);
+			st3=g_strdup(" ");
+			if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(di1)))
+			{
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(di2)))
+				{
+					cts=g_strdup_printf("(epsilon-diag %f %f %f) (epsilon-offdiag %f %f %f)", (mat->d11), (mat->d22), (mat->d33), (mat->d12), (mat->d13), (mat->d23));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				else
+				{
+					cts=g_strdup_printf("(epsilon %f)", (mat->d11));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(di3)))
+				{
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(di4)))
+				{
+					cts=g_strdup_printf("(D-conductivity %f)", (mat->dsg));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(di5)))
+				{
+					cts=g_strdup_printf("(chi2 %f)", (mat->dx2));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(di6)))
+				{
+					cts=g_strdup_printf("(chi3 %f)", (mat->dx3));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+			}
+			if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mg1)))
+			{
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mg2)))
+				{
+					cts=g_strdup_printf("(mu-diag %f %f %f) (mu-offdiag %f %f %f)", (mat->m11), (mat->m22), (mat->m33), (mat->m12), (mat->m13), (mat->m23));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				else
+				{
+					cts=g_strdup_printf("(mu %f)", (mat->m11));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mg3)))
+				{
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mg4)))
+				{
+					cts=g_strdup_printf("(B-conductivity %f)", (mat->msg));
+					st1=g_strjoin(" ", st3, cts, NULL);
+					{g_free(st3); g_free(cts);}
+					st3=g_strdup(st1);
+					g_free(st1);
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mg5)))
+				{
+				}
+				if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mg6)))
+				{
+				}
+			}
+			st1=g_strdup_printf("(define %s (make material-type%s))", (mat->nme), st3);
+			g_free(st3);
+			cts=g_strjoin(DLMT, st2, st1, NULL);
+			{g_free(st1); g_free(st2);}
+			st2=g_strdup(cts);
+			g_free(cts);
+		}
+		for (j=0;j<((circ->data)->len);j++)
+		{
+			dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), j);
+			if ((dcg->col)<0) st3=g_strdup("air");
+			else st3=g_strdup(((FdtdMat*) g_ptr_array_index(mtr, (dcg->col)))->nme);
+			for (k=0;k<((dcg->xyr)->len);k++)
+			{
+				dcd=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, k);
+				st1=g_strdup_printf("(set! geometry (list (make cylinder (center %f %f) (height infinity) (radius %f) (material %s))))", (dcd->x), (dcd->y), (dcd->r), st3);
+				cts=g_strjoin(DLMT, st2, st1, NULL);
+				{g_free(st1); g_free(st2);}
+				st2=g_strdup(cts);
+				g_free(cts);
+			}
+			g_free(st3);
+		}
+		st1=g_strdup_printf("(set! pml-layers (list (make pml (thickness %f))))", PML);
+		cts=g_strjoin(DLMT, st2, st1, NULL);
+		{g_free(st1); g_free(st2);}
+		st1=g_strdup("(set! resolution 10)");
+		st2=g_strjoin(DLMT, cts, st1, NULL);
+		{g_free(st1); g_free(cts);}
+		st1=g_strdup_printf("(define-param fcn %f)", fcn);
+		cts=g_strjoin(DLMT, st2, st1, NULL);
+		{g_free(st1); g_free(st2);}
+		st1=g_strdup_printf("(define-param fwd %f)", fwd);
+		st2=g_strjoin(DLMT, cts, st1, NULL);
+		{g_free(st1); g_free(cts);}
+		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ex))) cts=g_strdup("Ex");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ey))) cts=g_strdup("Ey");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hz))) cts=g_strdup("Hz");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hx))) cts=g_strdup("Hx");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hy))) cts=g_strdup("Hy");
+		else cts=g_strdup("Ez");
+		st1=g_strdup_printf("(set! sources (list (make source (src (make gaussian-src (frequency fcn) (fwidth fwd))) (component %s) (center 0 0) (size %f %f))))", cts, fsz, fsz);
+		g_free(cts);
+		cts=g_strjoin(DLMT, st2, st1, NULL);
+		{g_free(st1); g_free(st2);}
+		st1=g_strdup("(run-sources+ 300 (at-beginning output-epsilon) (after-sources (harminv Ez (vector3 0) fcn fwd)))");
+		st2=g_strjoin(DLMT, cts, st1, NULL);
+		{g_free(st1); g_free(cts);}
+		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd)))
+		{
+			if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ex))) cts=g_strdup("efield-x");
+			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ey))) cts=g_strdup("efield-y");
+			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hz))) cts=g_strdup("hfield-z");
+			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hx))) cts=g_strdup("hfield-x");
+			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hy))) cts=g_strdup("hfield-y");
+			else cts=g_strdup("efield-z");
+			st1=g_strdup_printf("(run-until (/ 1 fcn) (at-every (/ 1 fcn 20) output-%s))", cts);
+			g_free(cts);
+			cts=g_strjoin(DLMT, st2, st1, NULL);
+			{g_free(st1); g_free(st2);}
+			g_file_set_contents(fot, cts, -1, &Err);
+			g_free(cts);
+		}
+		else
+		{
+			g_file_set_contents(fot, st2, -1, &Err);
+			g_free(st2);
+		}
+		if (Err)
+		{
+			st1=g_strdup_printf(_("Error Saving file: %s."), (Err->message));
+			gtk_statusbar_push(GTK_STATUSBAR(sbr), gtk_statusbar_get_context_id(GTK_STATUSBAR(sbr), st1), st1);
+			g_free(st1);
+			g_error_free(Err);
+		}
+		g_free(fot);
 	}
 	gtk_widget_destroy(wfl);
 }

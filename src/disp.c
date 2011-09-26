@@ -30,26 +30,27 @@ guint alp=65535;
 
 void dpa(GtkWidget *wgt, gpointer dta)
 {
-	FdtdMat *mts;
+	DrawCirc *circ;
 	GdkColor clr;
 	gdouble *ptr;
 	gdouble iv;
 	gint dx;
 
 	dx=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(wgt));
+	circ=DRAW_CIRC(crc);
+	dx=(((DrawCircGroup*) g_ptr_array_index((circ->data), dx))->col)+2;
 	gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(cls), &clr);
 	alp=gtk_color_selection_get_current_alpha(GTK_COLOR_SELECTION(cls));
-	mts=(FdtdMat*) g_ptr_array_index(mtr, dx);
-	ptr=&(mts->red);
+	ptr=&g_array_index((circ->rd), gdouble, dx);
 	iv=((gdouble) (clr.red))/65535;
 	*ptr=iv;
-	ptr=&(mts->grn);
+	ptr=&g_array_index((circ->gr), gdouble, dx);
 	iv=((gdouble) (clr.green))/65535;
 	*ptr=iv;
-	ptr=&(mts->blu);
+	ptr=&g_array_index((circ->bl), gdouble, dx);
 	iv=((gdouble) (clr.blue))/65535;
 	*ptr=iv;
-	ptr=&(mts->alp);
+	ptr=&g_array_index((circ->al), gdouble, dx);
 	iv=((gdouble) alp)/65535;
 	*ptr=iv;
 }
@@ -62,24 +63,27 @@ void dpo(GtkWidget *wgt, gpointer dta)
 
 void upj(GtkWidget *wgt, gpointer dta)
 {
-	FdtdMat *mts;
+	DrawCirc *circ;
+	gchar *str;
 	GdkColor clr;
 	gint dx;
 
 	dx=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(wgt));
-	mts=(FdtdMat*) g_ptr_array_index(mtr, dx);
-	(clr.red)=(guint16) (65535*(mts->red));
-	(clr.green)=(guint16) (65535*(mts->grn));
-	(clr.blue)=(guint16) (65535*(mts->blu));
-	alp=(guint16) (65535*(mts->alp));
+	circ=DRAW_CIRC(crc);
+	dx=(((DrawCircGroup*) g_ptr_array_index((circ->data), dx))->col)+2;
+	(clr.red)=(guint16) (65535*g_array_index((circ->rd), gdouble, dx));
+	(clr.green)=(guint16) (65535*g_array_index((circ->gr), gdouble, dx));
+	(clr.blue)=(guint16) (65535*g_array_index((circ->bl), gdouble, dx));
+	alp=(guint16) (65535*g_array_index((circ->al), gdouble, dx));
+	str=g_strdup(((FdtdMat*) g_ptr_array_index(mtr, dx))->nme);/*change label*/
 	gdk_colormap_alloc_color(cmp, &clr, FALSE, TRUE);
 	gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(cls), &clr);
 	gtk_color_selection_set_current_alpha(GTK_COLOR_SELECTION(cls), alp);
 }
 
-void dpr(GtkWidget *widget, gpointer data)
+void dpr(GtkWidget *wgt, gpointer dta)
 {
-	FdtdMat *mts;
+	DrawCirc *circ;
 	GtkWidget *btt, *vpn, *hbx, *lbl, *vbx;
 	GtkAdjustment *adj;
 	AtkObject *atkwgt, *atklbl;
@@ -87,7 +91,7 @@ void dpr(GtkWidget *widget, gpointer data)
 	gchar *str;
 	gint dx;
 
-	hwn=gtk_dialog_new_with_buttons(_("Display Properties"), GTK_WINDOW(wdw), GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
+	hwn=gtk_dialog_new_with_buttons(_("Display Properties"), GTK_WINDOW(dta), GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
 	g_signal_connect_swapped(G_OBJECT(hwn), "destroy", G_CALLBACK(gtk_widget_destroy), G_OBJECT(hwn));
 	btt=gtk_button_new_from_stock(GTK_STOCK_CLOSE);
 	gtk_widget_show(btt);
@@ -110,23 +114,24 @@ void dpr(GtkWidget *widget, gpointer data)
 	gtk_paned_add1(GTK_PANED(vpn), cls);
 	gtk_color_selection_set_has_opacity_control(GTK_COLOR_SELECTION(cls), TRUE);
 	gtk_color_selection_set_has_palette(GTK_COLOR_SELECTION(cls), TRUE);
-	mts=(FdtdMat*) g_ptr_array_index(mtr, dx);
-	(clr.red)=(guint16) (65535*(mts->red));
-	(clr.green)=(guint16) (65535*(mts->grn));
-	(clr.blue)=(guint16) (65535*(mts->blu));
-	alp=(guint16) (65535*(mts->alp));
+	circ=DRAW_CIRC(crc);
+	dx=(((DrawCircGroup*) g_ptr_array_index((circ->data), grp))->col)+2;
+	(clr.red)=(guint16) (65535*g_array_index((circ->rd), gdouble, dx));
+	(clr.green)=(guint16) (65535*g_array_index((circ->gr), gdouble, dx));
+	(clr.blue)=(guint16) (65535*g_array_index((circ->bl), gdouble, dx));
+	alp=(guint16) (65535*g_array_index((circ->al), gdouble, dx));
 	gdk_colormap_alloc_color(cmp, &clr, FALSE, TRUE);
 	gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(cls), &clr);
 	gtk_color_selection_set_current_alpha(GTK_COLOR_SELECTION(cls), alp);
 	hbx=gtk_hbox_new(FALSE, 0);
 	gtk_widget_show(hbx);
 	gtk_paned_add2(GTK_PANED(vpn), hbx);
-	adj=(GtkAdjustment*) gtk_adjustment_new(dx, 0, (mtr->len), 1.0, 5.0, 0.0);
+	adj=(GtkAdjustment*) gtk_adjustment_new(grp, 0, ((circ->data)->len), 1.0, 5.0, 0.0);
 	jix=gtk_spin_button_new(adj, 0, 0);
 	gtk_widget_show(jix);
 	g_signal_connect(G_OBJECT(jix), "value-changed", G_CALLBACK(upj), NULL);
 	gtk_box_pack_start(GTK_BOX(hbx), jix, FALSE, FALSE, 2);
-	str=g_strdup(mts->nme);
+	str=g_strdup(((FdtdMat*) g_ptr_array_index(mtr, dx))->nme);
 	lbl=gtk_label_new(str);
 	gtk_widget_show(lbl);
 	gtk_box_pack_start(GTK_BOX(hbx), lbl, FALSE, FALSE, 2);

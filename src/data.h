@@ -25,9 +25,10 @@
 #ifndef __DATA_H__
 #	define __DATA_H__
 #	include "main.h"
-#	include "util.h"
-	extern GtkWidget *sbr, *wdw;
 	extern gchar *flr;
-	void sav(GtkWidget*, gpointer);
+	extern gdouble fcn, fsz, fwd;
+	extern GPtrArray *mtr;
+	extern GtkWidget *crc, *di1, *di2, *di3, *di4, *di5, *di6, *ex, *ey, *ez, *hx, *hy, *hz, *mfd, *mg1, *mg2, *mg3, *mg4, *mg5, *mg6, *sbr;
 	void opn(GtkWidget*, gpointer);
+	void sav(GtkWidget*, gpointer);
 #endif

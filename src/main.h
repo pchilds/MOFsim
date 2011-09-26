@@ -34,9 +34,11 @@
 #	else
 #		define DLMT "\n"
 #	endif
+#	define PML 1.0
+#	define CLL 10.0
 	typedef struct _FdtdMat FdtdMat;
 	typedef struct _FdtdLayout FdtdLayout;
 	struct _FdtdLayout {gint geo, mat, ring; gdouble xc, yc, rr, pitch, azim;};
-	struct _FdtdMat {gchar *nme; gdouble alp, blu, grn, red;};
+	struct _FdtdMat {gchar *nme; gdouble d11, d12, d13, d22, d23, d33, dpi, dpr, dsg, dx2, dx3, m11, m12, m13, m22, m23, m33, mpi, mpr, msg, mx2, mx3;};
 	G_END_DECLS
 #endif

@@ -25,8 +25,9 @@
 #ifndef __DISP_H__
 #	define __DISP_H__
 #	include "main.h"
-	extern GtkWidget *wdw, *sbar;
+	extern gint grp;
 	extern GPtrArray *mtr;
+	extern GtkWidget *crc, *sbar;
 	void dpa(GtkWidget*, gpointer);
 	void dpo(GtkWidget*, gpointer);
 	void upj(GtkWidget*, gpointer);

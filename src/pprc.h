@@ -25,5 +25,10 @@
 #ifndef __PPRC_H__
 #	define __PPRC_H__
 #	include "main.h"
+	extern gchar *flr;
+	extern gdouble fcn, fwd;
+	extern gint crn;
+	extern GtkWidget *mfd;
+	void crs(GtkWidget*, gpointer);
 	void go(GtkWidget*, gpointer);
 #endif

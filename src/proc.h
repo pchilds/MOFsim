@@ -25,5 +25,8 @@
 #ifndef __PROC_H__
 #	define __PROC_H__
 #	include "main.h"
+	extern gchar *flr;
+	extern gdouble fcn, fwd;
+	extern GtkWidget *mfd;
 	void go(GtkWidget*, gpointer);
 #endif

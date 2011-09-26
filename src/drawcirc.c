@@ -127,17 +127,17 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 	gint ft, j, k, lt, rw, ww, xw, yw;
 	GSList *dta;
 
-	xw=(wgt->allocation.width);
-	yw=(wgt->allocation.height);
+	xw=((wgt->allocation).width);
+	yw=((wgt->allocation).height);
 	circ=DRAW_CIRC(wgt);
 	priv=DRAW_CIRC_GET_PRIVATE(wgt);
 	if (circ->data)
 	{
 		sx=((priv->bounds.xmax)-(priv->bounds.xmin))/xw;
 		sy=((priv->bounds.ymax)-(priv->bounds.ymin))/yw;
-		if (sx>sy)
+		if (sx<sy)
 		{
-			{(priv->flago)=0; sx=1/sy;}
+			{(priv->flago)=1; sx=1/sy;}/*need to draw a box to clip outside*/
 			for (k=0;k<(circ->data->len);k++)
 			{
 				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
@@ -152,7 +152,7 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 					av=g_array_index((circ->al), gdouble, ft);
 				}
 				cairo_set_source_rgba(cr, vv, wv, zv, av);
-				for (j=0;j<(dcg->xyr->len);j++)
+				for (j=0;j<((dcg->xyr)->len);j++)
 				{
 					dtm=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
 					ww=(xw+(sx*((2*(dtm->x))-(priv->bounds.xmin)-(priv->bounds.xmax))))/2;
@@ -165,7 +165,7 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 		}
 		else
 		{
-			{(priv->flago)=1; sx=1/sx;}
+			{(priv->flago)=0; sx=1/sx;}/*need to draw a box to clip outside*/
 			for (k=0;k<(circ->data->len);k++)
 			{
 				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
@@ -179,7 +179,7 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 					av=g_array_index((circ->al), gdouble, ft);
 				}
 				cairo_set_source_rgba(cr, vv, wv, zv, av);
-				for (j=0;j<(dcg->xyr->len);j++)
+				for (j=0;j<((dcg->xyr)->len);j++)
 				{
 					dtm=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
 					xw=sx*((dtm->x)-(priv->bounds.xmin));
@@ -282,11 +282,28 @@ static gboolean draw_circ_motion_notify(GtkWidget *wgt, GdkEventMotion *vnt)
 
 	priv=DRAW_CIRC_GET_PRIVATE(wgt);
 	circ=DRAW_CIRC(wgt);
-	ds=(vnt->x)/(wgt->allocation.width);
-	(circ->xps)=((priv->bounds.xmax)*ds)+((priv->bounds.xmin)*(1-ds));
-	ds=(vnt->y)/(wgt->allocation.height);
-	(circ->yps)=((priv->bounds.ymax)*(1-ds))+((priv->bounds.ymin)*ds);
-	g_signal_emit(circ, draw_circ_signals[MOVED], 0);
+	if ((priv->flago)>0)
+	{
+		ds=((2*(vnt->x))-(wgt->allocation.width))*((priv->bounds.ymax)-(priv->bounds.ymin))/((wgt->allocation.height)*((priv->bounds.xmax)-(priv->bounds.xmin)));
+		if ((ds<=1)&&(ds>=-1))
+		{
+			(circ->xps)=(((priv->bounds.xmax)*(1+ds))+((priv->bounds.xmin)*(1-ds)))/2;
+			ds=(vnt->y)/(wgt->allocation.height);
+			(circ->yps)=((priv->bounds.ymax)*(1-ds))+((priv->bounds.ymin)*ds);
+			g_signal_emit(circ, draw_circ_signals[MOVED], 0);
+		}
+	}
+	else
+	{
+		ds=((2*(vnt->y))-(wgt->allocation.height))*((priv->bounds.xmax)-(priv->bounds.xmin))/((wgt->allocation.width)*((priv->bounds.ymax)-(priv->bounds.ymin)));
+		if ((ds<=1)&&(ds>=-1))
+		{
+			(circ->yps)=(((priv->bounds.ymax)*(1-ds))+((priv->bounds.ymin)*(1+ds)))/2;
+			ds=(vnt->x)/(wgt->allocation.width);
+			(circ->xps)=((priv->bounds.xmax)*ds)+((priv->bounds.xmin)*(1-ds));
+			g_signal_emit(circ, draw_circ_signals[MOVED], 0);
+		}
+	}
 	return FALSE;
 }
 
