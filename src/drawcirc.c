@@ -423,7 +423,7 @@ static gboolean draw_circ_button_release(GtkWidget *wgt, GdkEventButton *vnt)
 			draw_circ_update_scale(wgt, xn, xx, yn, yx);
 		}
 	}
-	else if ((priv->flagr)==2)
+	else if ((priv->flagr)==3)
 	{
 		if (circ->data)
 		{

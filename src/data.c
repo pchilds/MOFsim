@@ -95,7 +95,10 @@ void sav(GtkWidget *wgt, gpointer dta)
 		}
 		circ=DRAW_CIRC(crc);
 		g_object_get(G_OBJECT(crc), "xmin", &xn, "xmax", &xx, "ymin", &yn, "ymax", &yx, NULL);
-		st2=g_strdup_printf("(set! geometry-lattice (make lattice (size %f %f no-size)))", xx-xn+(2*PML), yx-yn+(2*PML));
+		cts=g_strdup("(reset-meep)");
+		st1=g_strdup_printf("(set! geometry-lattice (make lattice (size %f %f no-size)))", xx-xn+(2*PML), yx-yn+(2*PML));
+		st2=g_strjoin(DLMT, cts, st1, NULL);
+		{g_free(cts); g_free(st1);}
 		for (j=0;j<(mtr->len);j++)
 		{
 			mat=(FdtdMat*) g_ptr_array_index(mtr, j);
@@ -217,39 +220,35 @@ void sav(GtkWidget *wgt, gpointer dta)
 		st1=g_strdup_printf("(define-param fwd %f)", fwd);
 		st2=g_strjoin(DLMT, cts, st1, NULL);
 		{g_free(st1); g_free(cts);}
-		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ex))) cts=g_strdup("Ex");
-		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ey))) cts=g_strdup("Ey");
-		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hz))) cts=g_strdup("Hz");
-		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hx))) cts=g_strdup("Hx");
-		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hy))) cts=g_strdup("Hy");
-		else cts=g_strdup("Ez");
-		st1=g_strdup_printf("(set! sources (list (make source (src (make gaussian-src (frequency fcn) (fwidth fwd))) (component %s) (center 0 0) (size %f %f))))", cts, fsz, fsz);
-		g_free(cts);
+		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ex))) st3=g_strdup("Ex");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ey))) st3=g_strdup("Ey");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hz))) st3=g_strdup("Hz");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hx))) st3=g_strdup("Hx");
+		else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hy))) st3=g_strdup("Hy");
+		else st3=g_strdup("Ez");
+		st1=g_strdup_printf("(set! sources (list (make source (src (make gaussian-src (frequency fcn) (fwidth fwd))) (component %s) (center 0 0) (size %f %f))))", st3, fsz, fsz);
 		cts=g_strjoin(DLMT, st2, st1, NULL);
 		{g_free(st1); g_free(st2);}
-		st1=g_strdup("(run-sources+ 300 (at-beginning output-epsilon) (after-sources (harminv Ez (vector3 0) fcn fwd)))");
+		st1=g_strdup("(use-output-directory tmp)");
 		st2=g_strjoin(DLMT, cts, st1, NULL);
 		{g_free(st1); g_free(cts);}
-		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd)))
+		st1=g_strdup_printf("(run-sources+ 300 (at-beginning output-epsilon) (after-sources (harminv %s (vector3 0) fcn fwd)))", st3);
+		cts=g_strjoin(DLMT, st2, st1, NULL);
+		{g_free(st1); g_free(st2);}
+		if (!gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd)))
 		{
-			if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ex))) cts=g_strdup("efield-x");
-			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(ey))) cts=g_strdup("efield-y");
-			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hz))) cts=g_strdup("hfield-z");
-			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hx))) cts=g_strdup("hfield-x");
-			else if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(hy))) cts=g_strdup("hfield-y");
-			else cts=g_strdup("efield-z");
-			st1=g_strdup_printf("(run-until (/ 1 fcn) (at-every (/ 1 fcn 20) output-%s))", cts);
-			g_free(cts);
-			cts=g_strjoin(DLMT, st2, st1, NULL);
-			{g_free(st1); g_free(st2);}
-			g_file_set_contents(fot, cts, -1, &Err);
-			g_free(cts);
-		}
-		else
-		{
+			st1=g_strdup_printf("(run-until (/ 1 fcn) (at-every (/ 1 fcn 20) (output-png %s \"-Zc bluered\")))", st3);
+			st2=g_strjoin(DLMT, cts, st1, NULL);
+			{g_free(st1); g_free(cts);}
 			g_file_set_contents(fot, st2, -1, &Err);
 			g_free(st2);
 		}
+		else
+		{
+			g_file_set_contents(fot, cts, -1, &Err);
+			g_free(cts);
+		}
+		g_free(st3);
 		if (Err)
 		{
 			st1=g_strdup_printf(_("Error Saving file: %s."), (Err->message));

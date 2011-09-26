@@ -76,6 +76,8 @@ void go(GtkWidget *wgt, gpointer dta)
 		g_free(fin);
 		system(st1);
 		g_free(st1);
+		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd))) system("convert tmp/*.png output.gif");/*check for overwrite*/
+		/*g_rmdir("tmp");*/
 	}
 	gtk_widget_destroy(wfl);
 }

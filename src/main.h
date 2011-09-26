@@ -34,8 +34,13 @@
 #	else
 #		define DLMT "\n"
 #	endif
-#	define PML 1.0
-#	define CLL 10.0
+#	define PML 5.0
+#	define CLL 150.0
+#	define RDF 62.5
+#	define PTC 10
+#	define FCN 0.65
+#	define FWD 0.15
+#	define MFD 10
 	typedef struct _FdtdMat FdtdMat;
 	typedef struct _FdtdLayout FdtdLayout;
 	struct _FdtdLayout {gint geo, mat, ring; gdouble xc, yc, rr, pitch, azim;};

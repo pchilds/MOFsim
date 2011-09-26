@@ -255,11 +255,11 @@ void chl(DrawCirc *circ, gpointer data)
 	if (grp>=0)
 	{
 		lyt=(FdtdLayout*) g_ptr_array_index(fbl, grp);
-		gem=(lyt->geo);
+		gem=(lyt->geo);/*segfaults somehow likely bug elsewhere (zoom related)*/
 		if (gem>0) if (gtk_combo_box_get_active(GTK_COMBO_BOX(cb1))<=0) {gtk_widget_show(lb1); gtk_widget_show(lb2); gtk_widget_show(lb3); gtk_widget_show(pt); gtk_widget_show(rg); gtk_widget_show(az);}
 		else if (gtk_combo_box_get_active(GTK_COMBO_BOX(cb1))>0) {gtk_widget_hide(lb1); gtk_widget_hide(lb2); gtk_widget_hide(lb3); gtk_widget_hide(pt); gtk_widget_hide(rg); gtk_widget_hide(az);}
 		gtk_combo_box_set_active(GTK_COMBO_BOX(cb1), gem);
-		gtk_combo_box_set_active(GTK_COMBO_BOX(cb2), (lyt->mat));
+		gtk_combo_box_set_active(GTK_COMBO_BOX(cb2), (lyt->mat)+2);
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(xc), (lyt->xc));
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(yc), (lyt->yc));
 		gtk_spin_button_set_value(GTK_SPIN_BUTTON(rd), (lyt->rr));

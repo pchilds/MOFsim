@@ -5,9 +5,8 @@ opn
 Known Bugs/Issues
 -----------------
 * Fill outside clip region (DrawCirc.c)
-* placing air gives pink not white for first layer.
 * parallelise parallel version
-* changing layers doesn't work at all
+* changing layers sometimes doesn't give 2nd column
 * hidden files are shown in gtk_file_chooser
 * ?temporary layer is also saved?
 
