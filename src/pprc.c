@@ -71,12 +71,24 @@ void go(GtkWidget *wgt, gpointer dta)
 			fin=g_strconcat(st1, ".ctl", NULL);
 			g_free(st1);
 		}
-		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd))) st1=g_strdup_printf("meep %s", fin);
-		else st1=g_strdup_printf("meep fcn=%f fwd=%f %s", fcn, fwd, fin);
-		g_free(fin);
-		system(st1);
-		g_free(st1);
-		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd))) system("convert tmp/*.png output.gif");/*check for overwrite*/
+		if (gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mfd)))
+		{
+			st1=g_strdup_printf("meep %s | tee log.out", fin);
+			g_free(fin);
+			system(st1);
+			g_free(st1);
+			system("grep harminv0: log.out > tmp/log.dat");
+			/*g_remove("log.out");*/
+		}
+		else
+		{
+			st1=g_strdup_printf("meep fcn=%f fwd=%f %s", fcn, fwd, fin);
+			g_free(fin);
+			system(st1);
+			g_free(st1);
+			system("h5topng -RZc dkbluered -C tmp/*.h5");
+			system("convert tmp/*.png output.gif");/*check for overwrite*/
+		}
 		/*g_rmdir("tmp");*/
 	}
 	gtk_widget_destroy(wfl);

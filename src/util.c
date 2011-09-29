@@ -76,6 +76,61 @@ void add(GtkWidget *wgt, gpointer dta)
 	}
 }
 
+void apr(GtkWidget *wgt, gpointer dta)
+{
+	AtkObject *atklbl, *atkwgt;
+	GtkAdjustment *adj;
+	GtkWidget *ctt, *dlg, *fc, *fw, *fz, *lbl, *tbl;
+
+	dlg=gtk_dialog_new_with_buttons(_("Analysis Properties"), GTK_WINDOW(dta), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_APPLY, NULL);
+	g_signal_connect_swapped(G_OBJECT(dlg), "destroy", G_CALLBACK(gtk_widget_destroy), G_OBJECT(dlg));
+	gtk_widget_show(dlg);
+	ctt=gtk_dialog_get_content_area(GTK_DIALOG(dlg));
+	tbl=gtk_table_new(4, 2, FALSE);
+	gtk_widget_show(tbl);
+	lbl=gtk_label_new(_("Resolution:"));
+	gtk_table_attach(GTK_TABLE(tbl), lbl, 0, 1, 0, 1, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
+	gtk_widget_show(lbl);
+	adj=(GtkAdjustment*) gtk_adjustment_new(rsn, 0, G_MAXINT8, 1.0, 5.0, 0.0);
+	fc=gtk_spin_button_new(adj, 0.5, 3);
+	gtk_table_attach(GTK_TABLE(tbl), fc, 0, 1, 1, 2, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
+	gtk_widget_show(fc);
+	atkwgt=gtk_widget_get_accessible(fc);
+	atklbl=gtk_widget_get_accessible(GTK_WIDGET(lbl));
+	atk_object_add_relationship(atklbl, ATK_RELATION_LABEL_FOR, atkwgt);
+	atk_object_add_relationship(atkwgt, ATK_RELATION_LABELLED_BY, atklbl);
+	lbl=gtk_label_new(_("Frequency\nWidth:"));
+	gtk_table_attach(GTK_TABLE(tbl), lbl, 1, 2, 0, 1, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
+	gtk_widget_show(lbl);
+	adj=(GtkAdjustment*) gtk_adjustment_new(fwd, 0, G_MAXDOUBLE, 1.0, 5.0, 0.0);
+	fw=gtk_spin_button_new(adj, 0.5, 3);
+	gtk_table_attach(GTK_TABLE(tbl), fw, 1, 2, 1, 2, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
+	gtk_widget_show(fw);
+	atkwgt=gtk_widget_get_accessible(fw);
+	atklbl=gtk_widget_get_accessible(GTK_WIDGET(lbl));
+	atk_object_add_relationship(atklbl, ATK_RELATION_LABEL_FOR, atkwgt);
+	atk_object_add_relationship(atkwgt, ATK_RELATION_LABELLED_BY, atklbl);
+	lbl=gtk_label_new(_("Source\nWidth:"));
+	gtk_table_attach(GTK_TABLE(tbl), lbl, 0, 1, 2, 3, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
+	gtk_widget_show(lbl);
+	adj=(GtkAdjustment*) gtk_adjustment_new(fsz, 0, G_MAXDOUBLE, 1.0, 5.0, 0.0);
+	fz=gtk_spin_button_new(adj, 0.5, 3);
+	gtk_table_attach(GTK_TABLE(tbl), fz, 0, 1, 3, 4, GTK_FILL|GTK_SHRINK|GTK_EXPAND, GTK_FILL|GTK_SHRINK|GTK_EXPAND, 2, 2);
+	gtk_widget_show(fz);
+	atkwgt=gtk_widget_get_accessible(fz);
+	atklbl=gtk_widget_get_accessible(GTK_WIDGET(lbl));
+	atk_object_add_relationship(atklbl, ATK_RELATION_LABEL_FOR, atkwgt);
+	atk_object_add_relationship(atkwgt, ATK_RELATION_LABELLED_BY, atklbl);
+	gtk_box_pack_start(GTK_BOX(ctt), tbl, TRUE, TRUE, 2);
+	if (gtk_dialog_run(GTK_DIALOG(dlg))==GTK_RESPONSE_APPLY)
+	{
+		rsn=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(fc));
+		fwd=gtk_spin_button_get_value(GTK_SPIN_BUTTON(fw));
+		fsz=gtk_spin_button_get_value(GTK_SPIN_BUTTON(fz));
+	}
+	gtk_widget_destroy(dlg);
+}
+
 void azc(GtkWidget *wgt, gpointer dta)
 {
 	DrawCircData *dcd;

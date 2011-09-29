@@ -120,11 +120,11 @@ static void drwz(GtkWidget *wgt, cairo_t *cr)
 static void drwc(GtkWidget *wgt, cairo_t *cr)
 {
 	DrawCirc *circ;
-	DrawCircData *dtm;
+	DrawCircData *dcd;
 	DrawCircGroup *dcg;
 	DrawCircPrivate *priv;
 	gdouble av, sx, sy, vv, wv, zv;
-	gint ft, j, k, lt, rw, ww, xw, yw;
+	gint ft, j, k, lt, rw, ww, xw, yw, zw;
 	GSList *dta;
 
 	xw=((wgt->allocation).width);
@@ -137,7 +137,7 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 		sy=((priv->bounds.ymax)-(priv->bounds.ymin))/yw;
 		if (sx<sy)
 		{
-			{(priv->flago)=1; sx=1/sy;}/*need to draw a box to clip outside*/
+			{(priv->flago)=1; sy=1/sy;}
 			for (k=0;k<(circ->data->len);k++)
 			{
 				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
@@ -154,18 +154,35 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 				cairo_set_source_rgba(cr, vv, wv, zv, av);
 				for (j=0;j<((dcg->xyr)->len);j++)
 				{
-					dtm=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
-					ww=(xw+(sx*((2*(dtm->x))-(priv->bounds.xmin)-(priv->bounds.xmax))))/2;
-					yw=sx*((priv->bounds.ymax)-(dtm->y));
-					rw=sx*(dtm->r);
-					cairo_arc(cr, ww, yw, rw, 0, MY_2PI);
+					dcd=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
+					ww=(xw+(sy*((2*(dcd->x))-(priv->bounds.xmin)-(priv->bounds.xmax))))/2;
+					zw=sy*((priv->bounds.ymax)-(dcd->y));
+					rw=sy*(dcd->r);
+					cairo_arc(cr, ww, zw, rw, 0, MY_2PI);
 					cairo_fill(cr);
 				}
 			}
+			cairo_set_source_rgba(cr, 0, 0, 0, 1);
+			ww=xw*(1+(sy*sx))/2;
+			rw=xw-ww;
+			cairo_rectangle(cr, 0, 0, rw, yw);
+			cairo_fill(cr);
+			if (rw<25) cairo_rectangle(cr, ww, 15, rw, yw-15);
+			else
+			{
+				cairo_move_to(cr, ww, 0);
+				cairo_line_to(cr, xw-25, 0);
+				cairo_line_to(cr, xw-25, 15);
+				cairo_line_to(cr, xw, 15);
+				cairo_line_to(cr, xw, yw);
+				cairo_line_to(cr, ww, yw);
+				cairo_close_path(cr);
+			}
+			cairo_fill(cr);
 		}
 		else
 		{
-			{(priv->flago)=0; sx=1/sx;}/*need to draw a box to clip outside*/
+			(priv->flago)=0; sx=1/sx;
 			for (k=0;k<(circ->data->len);k++)
 			{
 				dcg=(DrawCircGroup*) g_ptr_array_index((circ->data), k);
@@ -181,14 +198,31 @@ static void drwc(GtkWidget *wgt, cairo_t *cr)
 				cairo_set_source_rgba(cr, vv, wv, zv, av);
 				for (j=0;j<((dcg->xyr)->len);j++)
 				{
-					dtm=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
-					xw=sx*((dtm->x)-(priv->bounds.xmin));
-					ww=(yw+(sx*((priv->bounds.ymax)+(priv->bounds.ymin)-(2*(dtm->y)))))/2;
-					rw=sx*(dtm->r);
-					cairo_arc(cr, xw, ww, rw, 0, MY_2PI);
+					dcd=(DrawCircData*) g_array_index((dcg->xyr), DrawCircData*, j);
+					ww=sx*((dcd->x)-(priv->bounds.xmin));
+					zw=(yw+(sx*((priv->bounds.ymax)+(priv->bounds.ymin)-(2*(dcd->y)))))/2;
+					rw=sx*(dcd->r);
+					cairo_arc(cr, ww, zw, rw, 0, MY_2PI);
 					cairo_fill(cr);
 				}
 			}
+			cairo_set_source_rgba(cr, 0, 0, 0, 1);
+			ww=yw*(1+(sy*sx))/2;
+			rw=yw-ww;
+			if (rw<15) cairo_rectangle(cr, 0, 0, xw-25, rw);
+			else
+			{
+				cairo_move_to(cr, 0, 0);
+				cairo_line_to(cr, xw-25, 0);
+				cairo_line_to(cr, xw-25, 15);
+				cairo_line_to(cr, xw, 15);
+				cairo_line_to(cr, xw, rw);
+				cairo_line_to(cr, 0, rw);
+				cairo_close_path(cr);
+			}
+			cairo_fill(cr);
+			cairo_rectangle(cr, 0, ww, xw, rw);
+			cairo_fill(cr);
 		}
 	}
 }

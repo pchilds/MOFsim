@@ -27,6 +27,7 @@
 #	include "main.h"
 	extern gchar *flr;
 	extern gdouble fcn, fsz, fwd;
+	extern gint rsn;
 	extern GPtrArray *mtr;
 	extern GtkWidget *crc, *di1, *di2, *di3, *di4, *di5, *di6, *ex, *ey, *ez, *hx, *hy, *hz, *mfd, *mg1, *mg2, *mg3, *mg4, *mg5, *mg6, *sbr;
 	void opn(GtkWidget*, gpointer);

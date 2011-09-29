@@ -26,13 +26,14 @@
 #	define __UTIL_H__
 #	include "main.h"
 	extern gdouble fcn, fsz, fwd;
-	extern gint gem, grp;
+	extern gint gem, grp, rsn;
 	extern GPtrArray *fbl, *mtr;
 	extern GtkWidget *az, *cb1, *cb2, *crc, *lb1, *lb2, *lb3, *pt, *rd, *rg, *sbr, *xc, *yc;
 	extern GtkWidget *di1, *di2, *di3, *di4, *di5, *di6, *mg1, *mg2, *mg3, *mg4, *mg5, *mg6;
 	extern gulong cb1_id, cb2_id;
 	void abt(GtkWidget*, gpointer);/*display about window*/
 	void add(GtkWidget*, gpointer);/*adds or updates currently selected group*/
+	void apr(GtkWidget*, gpointer);/*properties for analysis*/
 	void azc(GtkWidget*, gpointer);/*change of azimuth*/
 	void chl(DrawCirc*, gpointer);/*change selected group*/
 	void cmv(DrawCirc*, gpointer);/*track mouse position on layout display*/

@@ -41,6 +41,7 @@
 #	define FCN 0.65
 #	define FWD 0.15
 #	define MFD 10
+#	define RSN 10
 	typedef struct _FdtdMat FdtdMat;
 	typedef struct _FdtdLayout FdtdLayout;
 	struct _FdtdLayout {gint geo, mat, ring; gdouble xc, yc, rr, pitch, azim;};

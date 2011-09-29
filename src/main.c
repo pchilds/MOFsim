@@ -46,7 +46,7 @@ gint crn;
 gchar img[]=vrs;
 gchar *flr=NULL;
 gdouble fcn, fsz, fwd;
-gint gem, grp;
+gint gem, grp, rsn;
 GPtrArray *fbl, *mtr;
 GtkWidget *az, *cb1, *cb2, *crc, *di1, *di2, *di3, *di4, *di5, *di6, *ex, *ey, *ez, *hx, *hy, *hz, *lb1, *lb2, *lb3, *mfd, *mg1, *mg2, *mg3, *mg4, *mg5, *mg6, *pt, *rd, *rg, *sbr, *wdw, *sc, *xc, *yc;
 gulong cb1_id, cb2_id;
@@ -217,6 +217,11 @@ int main(int argc, char *argv[])
 	gtk_menu_shell_append(GTK_MENU_SHELL(mnu), mni);
 	gtk_widget_show(mni);
 #endif
+	mni=gtk_menu_item_new_with_label(_("Properties:"));
+	gtk_widget_add_accelerator(mni, "activate", a_g, GDK_F4, 0, GTK_ACCEL_VISIBLE);
+	g_signal_connect(G_OBJECT(mni), "activate", G_CALLBACK(apr), (gpointer)wdw);
+	gtk_menu_shell_append(GTK_MENU_SHELL(mnu), mni);
+	gtk_widget_show(mni);
 	mni=gtk_menu_item_new_with_mnemonic(_("_Analysis"));
 	gtk_widget_show(mni);
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(mni), mnu);
@@ -372,7 +377,7 @@ int main(int argc, char *argv[])
 	gtk_widget_show(btt);
 	g_signal_connect(G_OBJECT(btt), "clicked", G_CALLBACK(add), NULL);
 	flr=g_strdup("/home");
-	{grp=0; gem=0; fcn=FCN; fwd=FWD; fsz=MFD;}
+	{grp=0; gem=0; fcn=FCN; fwd=FWD; fsz=MFD; rsn=RSN;}
 	mtr=g_ptr_array_new();
 	fbl=g_ptr_array_new();
 	dcd=g_new(DrawCircData, 1);
